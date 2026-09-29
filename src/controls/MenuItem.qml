@@ -131,6 +131,13 @@ T.MenuItem {
         // A menu row has no pressed state of its own: pressing one only ever
         // chooses the row the pointer is over when the button comes back up.
         color: control.active ? control.hoveredColor : "transparent"
+
+        Behavior on color {
+            ColorAnimation {
+                duration: 120
+                easing.type: Easing.OutCubic
+            }
+        }
     }
 
     // Also called from the popup window when the row is clicked. Opening a

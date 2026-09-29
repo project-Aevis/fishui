@@ -47,12 +47,28 @@ Item {
     property alias image: _image
     signal clicked()
 
+    scale: mouseArea.pressed ? 0.94 : (mouseArea.containsMouse ? 1.04 : 1.00)
+
+    Behavior on scale {
+        NumberAnimation {
+            duration: 120
+            easing.type: Easing.OutQuad
+        }
+    }
+
     Rectangle {
         id: _background
         anchors.fill: parent
         anchors.margins: Math.round(size * 0.1)
         radius: control.height / 2
         color: mouseArea.pressed ? pressedColor : mouseArea.containsMouse ? control.hoveredColor : control.backgroundColor
+
+        Behavior on color {
+            ColorAnimation {
+                duration: 100
+                easing.type: Easing.OutQuad
+            }
+        }
     }
 
     MouseArea {
