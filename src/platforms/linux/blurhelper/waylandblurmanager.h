@@ -3,6 +3,11 @@
 
 #include <QObject>
 #include <QRegion>
+#include <QHash>
+#include <memory>
+
+struct ext_background_effect_manager_v1;
+struct ext_background_effect_surface_v1;
 
 namespace KWayland
 {
@@ -17,12 +22,10 @@ class Surface;
 }
 
 /**
- * Process-wide access to org_kde_kwin_blur.
+ * Process-wide access to compositor background blur.
  *
- * KWin blurs whatever a client asks it to blur and nothing else, so a
- * translucent window that wants the desktop behind it out of focus has to hand
- * the compositor a region. The manager is bound once from the registry and
- * shared; the blur object and its region belong to the window, in WindowBlur.
+ * Supports modern Wayland staging protocol ext_background_effect_v1 (KWin 6 / Plasma 6.2+)
+ * and legacy org_kde_kwin_blur (KWin 5).
  */
 class WaylandBlurManager : public QObject
 {
@@ -31,27 +34,37 @@ class WaylandBlurManager : public QObject
 public:
     static WaylandBlurManager *instance();
 
-    //! Whether the compositor announced the interface at all.
+    //! Whether a blur interface is available from the compositor.
     bool isValid() const;
 
-    //! A blur for @p surface, which the caller keeps for as long as the surface
-    //! lives. Deleting it does not clear the blur; removeBlur() does.
-    KWayland::Client::Blur *createBlur(KWayland::Client::Surface *surface);
+    //! Applies or updates the blur region for @p surface.
+    void updateBlur(KWayland::Client::Surface *surface, const QRegion &region);
+
+    //! Removes blur for @p surface and frees associated compositor effect resources.
     void removeBlur(KWayland::Client::Surface *surface);
 
-    //! Wraps @p region for the protocol. The compositor copies it when the blur
-    //! is committed, so the caller can drop it straight away.
+    //! Wraps @p region for the protocol.
     std::unique_ptr<KWayland::Client::Region> createRegion(const QRegion &region);
 
 Q_SIGNALS:
-    //! The interface arrived after a window had already asked for a blur.
+    //! Emitted when a blur interface becomes available.
     void ready();
+
+private Q_SLOTS:
+    void onSurfaceDestroyed(QObject *obj);
 
 private:
     explicit WaylandBlurManager(QObject *parent = nullptr);
+    ~WaylandBlurManager() override;
 
     KWayland::Client::BlurManager *m_manager = nullptr;
     KWayland::Client::Compositor *m_compositor = nullptr;
+    struct ext_background_effect_manager_v1 *m_extManager = nullptr;
+    bool m_hasBlurCapability = false;
+
+    // Track active blur per surface for both backends
+    QHash<KWayland::Client::Surface *, KWayland::Client::Blur *> m_legacyBlurs;
+    QHash<KWayland::Client::Surface *, struct ext_background_effect_surface_v1 *> m_extEffects;
 };
 
 #endif // WAYLANDBLURMANAGER_H

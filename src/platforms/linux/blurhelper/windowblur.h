@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2021-2026 CutefishOS Team.
  *
  * Author:     cutefish <cutefishos@foxmail.com>
  *
@@ -31,7 +31,6 @@ namespace KWayland
 {
 namespace Client
 {
-class Blur;
 class Surface;
 }
 }
@@ -84,7 +83,6 @@ private:
     QRegion blurRegion() const;
 
     QPointer<QWindow> m_view;
-    QPointer<KWayland::Client::Blur> m_blur;
     KWayland::Client::Surface *m_surface = nullptr;
     QRegion m_region;
     bool m_enabled = false;

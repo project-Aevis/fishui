@@ -48,7 +48,18 @@ Item {
 
         border.width: control.borderEnabled ? 1 / FishUI.Dpi.ratio : 0
         border.pixelAligned: FishUI.Dpi.ratio <= 1
-        border.color: FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.1) : Qt.rgba(0, 0, 0, 0.1)
+        border.color: FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(0, 0, 0, 0.08)
+
+        // Inner Specular Glass Rim
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 1
+            radius: Math.max(0, _background.radius - 1)
+            color: "transparent"
+            border.width: control.borderEnabled ? 1 / FishUI.Dpi.ratio : 0
+            border.color: FishUI.Theme.glassSpecularColor
+            visible: control.borderEnabled
+        }
 
         Behavior on color {
             ColorAnimation {

@@ -68,10 +68,10 @@ QtObject {
     property font defaultFont: fontMetrics.font
     property font smallFont: {
         let font = fontMetrics.font
-        if (!!font.pixelSize) {
-            font.pixelSize =- 2
+        if (font.pixelSize > 0) {
+            font.pixelSize = Math.max(1, font.pixelSize - 1)
         } else {
-            font.pointSize =- 2
+            font.pointSize = Math.max(1, font.pointSize - 1)
         }
         return font
     }
@@ -79,6 +79,8 @@ QtObject {
     property list<QtObject> children: [
         TextMetrics {
             id: fontMetrics
+            font.family: theme.fontFamily
+            font.pointSize: theme.fontSize
         }
     ]
 

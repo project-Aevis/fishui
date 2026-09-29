@@ -3,23 +3,26 @@ import FishUI 1.0 as FishUI
 
 Item {
     id: indicator
-    implicitWidth: 38
-    implicitHeight: 32
+    implicitWidth: 42
+    implicitHeight: 28
 
     property Item control
     property alias handle: handle
-    property color bgColor : control.checked ? FishUI.Theme.highlightColor : Qt.rgba(FishUI.Theme.textColor.r, 
-                                                                                     FishUI.Theme.textColor.g,
-                                                                                     FishUI.Theme.textColor.b, 0.2)
+    property color bgColor: control.checked ? FishUI.Theme.highlightColor
+                                            : FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.20)
+                                                                    : Qt.rgba(0, 0, 0, 0.16)
+
     Rectangle {
-        width: parent.width
-        height: 20
+        width: parent.width - 2
+        height: 22
+        x: 1
         radius: height / 2
         y: parent.height / 2 - height / 2
-        color: control.enabled ? bgColor : "transparent"
+        color: bgColor
+        opacity: control.enabled ? 1 : 0.55
         Behavior on color {
             ColorAnimation {
-                duration: 125
+                duration: 150
                 easing.type: Easing.InOutCubic
             }
         }
@@ -27,12 +30,13 @@ Item {
 
     Rectangle {
         id: handle
-        x: Math.max(2, Math.min(parent.width - width, control.visualPosition * parent.width - (width / 2)) - 2)
+        x: 2 + control.visualPosition * (parent.width - width - 4)
         y: (parent.height - height) / 2
-        width: 16
-        height: 16
+        width: 18
+        height: 18
         radius: width / 2
-        color: control.enabled ? "white" : "transparent"
+        color: "white"
+        opacity: control.enabled ? 1 : 0.65
         scale: control.pressed ? 0.8 : 1
 
         Behavior on scale {

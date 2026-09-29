@@ -29,7 +29,10 @@ IconItem::IconItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
 {
     setFlag(ItemHasContents, true);
-    setSmooth(false);
+    setRenderTarget(QQuickPaintedItem::Image);
+    setSmooth(true);
+    setAntialiasing(true);
+    setMipmap(false);
 }
 
 void IconItem::setSource(const QVariant &source)
@@ -119,7 +122,7 @@ void IconItem::paint(QPainter *painter)
     if (m_iconPixmap.isNull())
         return;
 
-    painter->setRenderHints(QPainter::SmoothPixmapTransform);
+    painter->setRenderHints(QPainter::SmoothPixmapTransform | QPainter::Antialiasing);
     painter->drawPixmap(contentsBoundingRect().toRect(), m_iconPixmap);
 }
 

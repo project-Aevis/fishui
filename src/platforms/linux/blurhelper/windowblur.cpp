@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2021-2026 CutefishOS Team.
  *
  * Author:     cutefish <cutefishos@foxmail.com>
  *
@@ -21,11 +21,10 @@
 #include "waylandblurmanager.h"
 
 #include <QEvent>
-#include <QTimer>
+#include <QMetaObject>
+#include <QPlatformSurfaceEvent>
 #include <QWindow>
 
-#include <KWayland/Client/blur.h>
-#include <KWayland/Client/region.h>
 #include <KWayland/Client/surface.h>
 
 using namespace KWayland::Client;
@@ -66,6 +65,7 @@ WindowBlur::WindowBlur(QObject *parent) noexcept
 
 WindowBlur::~WindowBlur()
 {
+    forget();
 }
 
 void WindowBlur::classBegin()
@@ -86,8 +86,8 @@ void WindowBlur::setView(QWindow *view)
     if (m_view)
         m_view->removeEventFilter(this);
 
-    m_view = view;
     forget();
+    m_view = view;
 
     if (m_view) {
         // Qt destroys the wl_surface whenever the window is hidden and makes a
@@ -96,10 +96,11 @@ void WindowBlur::setView(QWindow *view)
         m_view->installEventFilter(this);
         connect(m_view, &QWindow::widthChanged, this, &WindowBlur::scheduleUpdate, Qt::UniqueConnection);
         connect(m_view, &QWindow::heightChanged, this, &WindowBlur::scheduleUpdate, Qt::UniqueConnection);
+        connect(m_view, &QWindow::visibleChanged, this, &WindowBlur::scheduleUpdate, Qt::UniqueConnection);
     }
 
     Q_EMIT viewChanged();
-    updateBlur();
+    scheduleUpdate();
 }
 
 QWindow *WindowBlur::view() const
@@ -113,7 +114,7 @@ void WindowBlur::setEnabled(bool enabled)
         return;
 
     m_enabled = enabled;
-    updateBlur();
+    scheduleUpdate();
     Q_EMIT enabledChanged();
 }
 
@@ -128,7 +129,7 @@ void WindowBlur::setWindowRadius(qreal radius)
         return;
 
     m_windowRadius = radius;
-    updateBlur();
+    scheduleUpdate();
     Q_EMIT windowRadiusChanged();
 }
 
@@ -139,12 +140,21 @@ qreal WindowBlur::windowRadius() const
 
 bool WindowBlur::eventFilter(QObject *watched, QEvent *event)
 {
-    if (watched == m_view
-            && (event->type() == QEvent::Expose || event->type() == QEvent::PlatformSurface)) {
-        // A window that was just exposed has a surface again, and the region it
-        // was given before went with the old one.
-        forget();
-        updateBlur();
+    if (watched == m_view) {
+        if (event->type() == QEvent::Expose) {
+            updateBlur();
+        } else if (event->type() == QEvent::PlatformSurface) {
+            const auto *surfaceEvent = static_cast<QPlatformSurfaceEvent *>(event);
+            if (surfaceEvent->surfaceEventType() == QPlatformSurfaceEvent::SurfaceAboutToBeDestroyed) {
+                forget();
+            } else {
+                // The QWindow surface is not guaranteed to be available until
+                // the platform-surface event has finished dispatching.
+                QMetaObject::invokeMethod(this, [this] { updateBlur(); }, Qt::QueuedConnection);
+            }
+        } else if (event->type() == QEvent::Hide) {
+            forget();
+        }
     }
 
     return QObject::eventFilter(watched, event);
@@ -167,10 +177,10 @@ QRegion WindowBlur::blurRegion() const
 
 void WindowBlur::forget()
 {
-    // The blur object belongs to the surface and dies with it; this only drops
-    // our own handle on it and the region we remember having set.
-    m_blur = nullptr;
-    m_surface = nullptr;
+    if (m_surface) {
+        WaylandBlurManager::instance()->removeBlur(m_surface);
+        m_surface = nullptr;
+    }
     m_region = QRegion();
 }
 
@@ -183,41 +193,25 @@ void WindowBlur::updateBlur()
     if (!manager->isValid())
         return;
 
+    if (!m_enabled || !m_view->isVisible()) {
+        forget();
+        return;
+    }
+
     Surface *surface = Surface::fromWindow(m_view);
     if (!surface)
         return;
 
-    if (surface != m_surface)
+    if (surface != m_surface) {
         forget();
-
-    const QRegion region = blurRegion();
-    if (surface == m_surface && region == m_region)
-        return;
-
-    m_surface = surface;
-    m_region = region;
-
-    if (region.isEmpty()) {
-        // One blur object per surface, kept for as long as the surface lives:
-        // a window that is resized would otherwise leave a protocol object
-        // behind on every single frame of the resize.
-        delete m_blur;
-        m_blur = nullptr;
-        manager->removeBlur(surface);
-    } else {
-        if (!m_blur)
-            m_blur = manager->createBlur(surface);
-
-        if (!m_blur)
-            return;
-
-        const std::unique_ptr<Region> area = manager->createRegion(region);
-        m_blur->setRegion(area.get());
-        m_blur->commit();
+        m_surface = surface;
     }
 
-    // Blur state is double buffered; it takes effect with the surface's next
-    // commit. Committing here would pair the pending viewport destination with
-    // the buffer on screen: one stretched frame per step of a resize.
+    const QRegion region = blurRegion();
+    if (region == m_region)
+        return;
+
+    m_region = region;
+    manager->updateBlur(surface, region);
     m_view->requestUpdate();
 }

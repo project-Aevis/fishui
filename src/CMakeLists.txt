@@ -22,11 +22,13 @@ target_sources(${TARGET} PRIVATE
         platforms/linux/windowhelper.cpp platforms/linux/windowhelper.h
         platforms/linux/blurhelper/windowblur.cpp platforms/linux/blurhelper/windowblur.h
         platforms/linux/blurhelper/waylandblurmanager.cpp platforms/linux/blurhelper/waylandblurmanager.h
+        platforms/linux/blurhelper/ext-background-effect-v1-protocol.c
+        platforms/linux/blurhelper/ext-background-effect-v1-client-protocol.h
         platforms/linux/shadowhelper/boxshadowrenderer.cpp platforms/linux/shadowhelper/boxshadowrenderer.h
         platforms/linux/shadowhelper/waylandshadowmanager.cpp platforms/linux/shadowhelper/waylandshadowmanager.h
         platforms/linux/shadowhelper/windowshadow.cpp platforms/linux/shadowhelper/windowshadow.h
         )
-target_include_directories(${TARGET} PRIVATE platforms/linux)
+target_include_directories(${TARGET} PRIVATE platforms/linux platforms/linux/blurhelper)
 target_link_libraries(${TARGET}
         PUBLIC
         Qt6::Core
@@ -41,6 +43,7 @@ target_link_libraries(${TARGET}
         Qt6::GuiPrivate
         KF6::WindowSystem
         Plasma::KWaylandClient
+        PkgConfig::WaylandClient
         )
 generate_export_header(${TARGET} BASE_NAME ${TARGET})
 # The QML module directory is the only home: a second copy in the library

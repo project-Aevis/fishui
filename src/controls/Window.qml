@@ -54,11 +54,12 @@ Window {
     property bool heightResizable: maximumHeight > minimumHeight
 
     property bool minimizeButtonVisible: true
+    property bool windowButtonsVisible: true
 
     property var windowButtonsAlignment: Qt.AlignTop
     property real windowButtonsTopMargin: FishUI.Units.smallSpacing
     property real windowButtonsRightMargin: windowButtonsTopMargin
-    property real windowButtonsSpacing: FishUI.Units.smallSpacing / 2
+    property real windowButtonsSpacing: 2.0
 
     onHeaderItemChanged: {
         if (headerItem) {
@@ -92,6 +93,12 @@ Window {
         view: control
         radius: control.windowRadius
         strength: control.active || !control._wasActive ? 0.8 : 0.5
+    }
+
+    FishUI.WindowBlur {
+        view: control
+        windowRadius: control.windowRadius
+        enabled: FishUI.Theme.blurEnabled
     }
 
     // Left bottom edge
@@ -200,13 +207,23 @@ Window {
         anchors.fill: parent
         radius: !isMaximized && !isFullScreen ? control.windowRadius : 0
         color: FishUI.Theme.backgroundColor
+        opacity: FishUI.Theme.blurEnabled ? (FishUI.Theme.darkMode ? 0.75 : 0.78) : 1
         antialiasing: true
 
         border.width: control._borderWidth
         border.pixelAligned: FishUI.Dpi.ratio <= 1
-        border.color: FishUI.Theme.darkMode
-                      ? Qt.rgba(1, 1, 1, control.active ? 0.16 : 0.10)
-                      : Qt.rgba(0, 0, 0, control.active ? 0.18 : 0.12)
+        border.color: FishUI.Theme.glassBorderColor
+
+        // Inner Specular Glass Rim
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 1
+            radius: Math.max(0, _background.radius - 1)
+            color: "transparent"
+            border.width: control._borderWidth
+            border.color: FishUI.Theme.glassSpecularColor
+            visible: !isMaximized && !isFullScreen
+        }
 
         Behavior on color {
             enabled: control._settled
@@ -274,61 +291,117 @@ Window {
                 anchors.fill: parent
                 spacing: 0
 
+                // macOS Traffic Lights Window Controls (Left side)
+                Item {
+                    id: trafficLightsContainer
+                    implicitWidth: trafficLightsRow.implicitWidth
+                    implicitHeight: trafficLightsRow.implicitHeight
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.leftMargin: 14
+                    Layout.rightMargin: 12
+                    visible: control.windowButtonsVisible
+
+                    property bool hovered: trafficLightsHover.containsMouse
+
+                    MouseArea {
+                        id: trafficLightsHover
+                        anchors.fill: parent
+                        anchors.margins: -4
+                        hoverEnabled: true
+                        acceptedButtons: Qt.NoButton
+                    }
+
+                    Row {
+                        id: trafficLightsRow
+                        spacing: 8
+                        anchors.centerIn: parent
+
+                        property bool hovered: trafficLightsContainer.hovered
+
+                        // Close (Red)
+                        Rectangle {
+                            width: 14
+                            height: 14
+                            radius: 7
+                            color: control.active ? (closeArea.pressed ? "#BF4942" : "#FF5F56") : (FishUI.Theme.darkMode ? "#4A4A4E" : "#C6C6C6")
+                            border.width: 1
+                            border.color: control.active ? (closeArea.pressed ? "#993832" : "#E0443E") : (FishUI.Theme.darkMode ? "#3D3D40" : "#B5B5B5")
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "×"
+                                font.pixelSize: 11
+                                font.bold: true
+                                color: "#4D0000"
+                                opacity: trafficLightsRow.hovered && control.active ? 0.8 : 0
+                            }
+
+                            MouseArea {
+                                id: closeArea
+                                anchors.fill: parent
+                                onClicked: control.close()
+                            }
+                        }
+
+                        // Minimize (Yellow)
+                        Rectangle {
+                            width: 14
+                            height: 14
+                            radius: 7
+                            color: control.active ? (minArea.pressed ? "#C18E22" : "#FFBD2E") : (FishUI.Theme.darkMode ? "#4A4A4E" : "#C6C6C6")
+                            border.width: 1
+                            border.color: control.active ? (minArea.pressed ? "#99701A" : "#DEA123") : (FishUI.Theme.darkMode ? "#3D3D40" : "#B5B5B5")
+                            visible: control.minimizeButtonVisible
+
+                            Text {
+                                anchors.centerIn: parent
+                                anchors.verticalCenterOffset: -1
+                                text: "−"
+                                font.pixelSize: 12
+                                font.bold: true
+                                color: "#663B00"
+                                opacity: trafficLightsRow.hovered && control.active ? 0.8 : 0
+                            }
+
+                            MouseArea {
+                                id: minArea
+                                anchors.fill: parent
+                                onClicked: windowHelper.minimizeWindow(control)
+                            }
+                        }
+
+                        // Maximize / Zoom (Green)
+                        Rectangle {
+                            width: 14
+                            height: 14
+                            radius: 7
+                            color: control.active ? (maxArea.pressed ? "#1D9830" : "#27C93F") : (FishUI.Theme.darkMode ? "#4A4A4E" : "#C6C6C6")
+                            border.width: 1
+                            border.color: control.active ? (maxArea.pressed ? "#157524" : "#1AAB29") : (FishUI.Theme.darkMode ? "#3D3D40" : "#B5B5B5")
+                            visible: !control.isFullScreen && control.minimumWidth !== control.maximumWidth && control.maximumHeight !== control.minimumHeight
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "+"
+                                font.pixelSize: 11
+                                font.bold: true
+                                color: "#0B4D16"
+                                opacity: trafficLightsRow.hovered && control.active ? 0.8 : 0
+                            }
+
+                            MouseArea {
+                                id: maxArea
+                                anchors.fill: parent
+                                onClicked: control.toggleMaximized()
+                            }
+                        }
+                    }
+                }
+
                 Item {
                     id: _headerContent
                     Layout.fillHeight: true
                     Layout.fillWidth: true
-                }
-
-                RowLayout {
-                    spacing: control.windowButtonsSpacing
-                    Layout.alignment: control.windowButtonsAlignment
-
-                    // Window buttons
-                    RoundImageButton {
-                        size: _header.buttonSize
-                        source: "qrc:/fishui/kit/images/" + (FishUI.Theme.darkMode ? "dark/" : "light/") + "minimize.svg"
-                        onClicked: windowHelper.minimizeWindow(control)
-                        visible: control.minimizeButtonVisible
-                        Layout.alignment: control.windowButtonsAlignment
-                        Layout.topMargin: control.windowButtonsTopMargin
-                        image.smooth: false
-                        image.antialiasing: true
-                        // The artwork is a 24x24 grid; anything else is soft.
-                        iconSize: 24
-                    }
-
-                    RoundImageButton {
-                        size: _header.buttonSize
-                        source: "qrc:/fishui/kit/images/" +
-                            (FishUI.Theme.darkMode ? "dark/" : "light/") +
-                            (control.visibility === Window.Maximized ? "restore.svg" : "maximize.svg")
-                        onClicked: control.toggleMaximized()
-                        visible: !control.isFullScreen &&  control.minimumWidth !== control.maximumWidth && control.maximumHeight !== control.minimumHeight
-                        Layout.alignment: control.windowButtonsAlignment
-                        Layout.topMargin: control.windowButtonsTopMargin
-                        image.smooth: false
-                        image.antialiasing: true
-                        // The artwork is a 24x24 grid; anything else is soft.
-                        iconSize: 24
-                    }
-
-                    RoundImageButton {
-                        size: _header.buttonSize
-                        source: "qrc:/fishui/kit/images/" + (FishUI.Theme.darkMode ? "dark/" : "light/") + "close.svg"
-                        onClicked: control.close()
-                        // visible: !control.isFullScreen
-                        Layout.alignment: control.windowButtonsAlignment
-                        Layout.topMargin: control.windowButtonsTopMargin
-                        image.smooth: false
-                        image.antialiasing: true
-                        // The artwork is a 24x24 grid; anything else is soft.
-                        iconSize: 24
-                    }
-                }
-
-                Item {
-                    width: control.windowButtonsRightMargin
                 }
             }
         }

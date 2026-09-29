@@ -25,6 +25,7 @@ Dialog 1.0 Dialog.qml
 PopupTips 1.0 PopupTips.qml
 RoundedRect 1.0 RoundedRect.qml
 Window 1.0 Window.qml
+Label 1.0 Label.qml
 RoundImageButton 1.0 RoundImageButton.qml
 SegmentedControl 1.0 SegmentedControl.qml
 TabBar 1.0 TabBar.qml
