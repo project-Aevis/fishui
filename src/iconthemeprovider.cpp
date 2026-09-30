@@ -40,9 +40,7 @@ QPixmap IconThemeProvider::requestPixmap(const QString &id, QSize *realSize,
         if (cur != QLatin1String("Cutefish")) {
             QIcon::setThemeName(QLatin1String("Cutefish"));
             icon = QIcon::fromTheme(id);
-            if (icon.isNull()) {
-                QIcon::setThemeName(cur);
-            }
+            QIcon::setThemeName(cur);
         }
     }
     if (icon.isNull())

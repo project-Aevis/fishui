@@ -24,6 +24,7 @@
 #include <QImageReader>
 #include <QPainter>
 #include <QIcon>
+#include <QFileInfo>
 
 IconItem::IconItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
@@ -32,7 +33,7 @@ IconItem::IconItem(QQuickItem *parent)
     setRenderTarget(QQuickPaintedItem::Image);
     setSmooth(true);
     setAntialiasing(true);
-    setMipmap(false);
+    setMipmap(true);
 }
 
 void IconItem::setSource(const QVariant &source)
@@ -60,7 +61,12 @@ void IconItem::setSource(const QVariant &source)
     }
 
     if (!localFile.isEmpty()) {
-        if (sourceString.endsWith(QLatin1String(".svg"))
+        QString baseName = QFileInfo(localFile).completeBaseName();
+        if (!baseName.isEmpty() && QIcon::hasThemeIcon(baseName)) {
+            m_iconName = baseName;
+            m_icon = QIcon();
+            m_image = QImage();
+        } else if (sourceString.endsWith(QLatin1String(".svg"))
             || sourceString.endsWith(QLatin1String(".svgz"))
             || sourceString.endsWith(QLatin1String(".ico"))) {
             m_icon = QIcon(localFile);
