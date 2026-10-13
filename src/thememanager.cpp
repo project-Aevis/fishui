@@ -89,8 +89,9 @@ bool ThemeManager::isMonochromeIcon(const QString &name)
     QRgb first = 0;
 
     for (int y = 0; y < image.height() && uniform; ++y) {
+        const QRgb *scanline = reinterpret_cast<const QRgb *>(image.constScanLine(y));
         for (int x = 0; x < image.width(); ++x) {
-            const QRgb pixel = image.pixel(x, y);
+            const QRgb pixel = scanline[x];
 
             // The edges of a glyph are antialiased against nothing, so their
             // colour says nothing about the artwork.
