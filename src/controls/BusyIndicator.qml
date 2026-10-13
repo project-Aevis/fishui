@@ -43,7 +43,7 @@ Image {
     RotationAnimator {
         id: rotationAnimator
         target: control
-        running: control.visible
+        running: control.visible && control.running
         from: 0
         to: 360
         loops: Animation.Infinite
