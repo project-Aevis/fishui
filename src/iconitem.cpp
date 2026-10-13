@@ -177,11 +177,10 @@ void IconItem::loadPixmap()
     const qreal scale = scaleFactor();
     m_pixmapScale = scale;
 
-    const QSize size = QSize(width(), height());
+    const QSize size = QSize(qRound(width()), qRound(height()));
     QPixmap result;
 
-    if (size.width() < 0 ||
-            size.height() < 0) {
+    if (size.width() <= 0 || size.height() <= 0) {
         m_iconPixmap = QPixmap();
         update();
         return;
@@ -230,6 +229,9 @@ void IconItem::geometryChange(const QRectF &newGeometry, const QRectF &oldGeomet
     QQuickPaintedItem::geometryChange(newGeometry, oldGeometry);
 
     if (newGeometry.width() > 0 && newGeometry.height() > 0) {
-        loadPixmap();
+        if (qRound(newGeometry.width()) != qRound(oldGeometry.width()) ||
+            qRound(newGeometry.height()) != qRound(oldGeometry.height())) {
+            loadPixmap();
+        }
     }
 }
