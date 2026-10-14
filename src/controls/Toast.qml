@@ -195,14 +195,16 @@ Popup {
                 color: FishUI.Theme.backgroundColor
                 radius: FishUI.Theme.mediumRadius
                 opacity: FishUI.Theme.blurEnabled ? 0.82 : 1
+                border.width: 1 / Screen.devicePixelRatio
+                border.color: FishUI.Theme.glassBorderColor
                 layer.enabled: true
                 layer.effect: DropShadow {
                     transparentBorder: true
-                    radius: 32
-                    samples: 32
+                    radius: 10
+                    samples: 11
                     horizontalOffset: 0
-                    verticalOffset: 0
-                    color: Qt.rgba(0, 0, 0, 0.14)
+                    verticalOffset: 2
+                    color: Qt.rgba(0, 0, 0, FishUI.Theme.darkMode ? 0.18 : 0.08)
                 }
             }
         }

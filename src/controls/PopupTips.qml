@@ -32,8 +32,7 @@ Window {
     property alias backgroundOpacity: _background.opacity
     property alias backgroundColor: _background.color
     property alias blurEnabled: windowBlur.enabled
-    property var borderColor: FishUI.Theme.darkMode ? Qt.rgba(255, 255, 255, 0.3)
-                                                    : Qt.rgba(0, 0, 0, 0.2)
+    property var borderColor: FishUI.Theme.glassBorderColor
     flags: Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus | Qt.ToolTip
     width: label.implicitWidth + FishUI.Units.largeSpacing * 1.5
     height: label.implicitHeight + FishUI.Units.largeSpacing * 1.5
@@ -50,7 +49,7 @@ Window {
     FishUI.WindowBlur {
         id: windowBlur
         view: control
-        enabled: true
+        enabled: FishUI.Theme.blurEnabled
         windowRadius: _background.radius
     }
 
@@ -58,6 +57,7 @@ Window {
         id: _background
         anchors.fill: parent
         color: FishUI.Theme.secondBackgroundColor
+        opacity: windowBlur.enabled && FishUI.Theme.blurEnabled ? (FishUI.Theme.darkMode ? 0.82 : 0.86) : 1
         radius: FishUI.Theme.mediumRadius
         border.color: control.borderColor
         border.width: 1 / FishUI.Dpi.ratio

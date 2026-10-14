@@ -30,7 +30,7 @@ Image {
     sourceSize: Qt.size(width, height)
     visible: true
 
-    property alias running: rotationAnimator.running
+    property bool running: true
 
     ColorOverlay {
         anchors.fill: control

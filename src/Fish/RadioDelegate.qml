@@ -13,12 +13,12 @@ T.RadioDelegate {
                                       indicator ? indicator.implicitHeight : 0) + topPadding + bottomPadding)
     baselineOffset: contentItem.y + contentItem.baselineOffset
 
-    topPadding: control.FishUI.Units.smallSpacing
-    bottomPadding: control.FishUI.Units.smallSpacing
-    leftPadding: control.FishUI.Units.smallSpacing
-    rightPadding: control.FishUI.Units.smallSpacing
+    topPadding: FishUI.Units.smallSpacing
+    bottomPadding: FishUI.Units.smallSpacing
+    leftPadding: FishUI.Units.smallSpacing
+    rightPadding: FishUI.Units.smallSpacing
 
-    spacing: control.FishUI.Units.smallSpacing
+    spacing: FishUI.Units.smallSpacing
 
     opacity: control.enabled ? 1.0 : 0.5
 

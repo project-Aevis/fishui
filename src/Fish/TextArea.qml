@@ -70,6 +70,6 @@ T.TextArea {
         y: parent.height - height - control.bottomPadding / 2
         implicitWidth: 120
         height: control.activeFocus ? 2 : 1
-        color: control.FishUI.Theme.backgroundColor
+        color: control.activeFocus ? FishUI.Theme.highlightColor : (FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.2) : Qt.rgba(0, 0, 0, 0.15))
     }
 }

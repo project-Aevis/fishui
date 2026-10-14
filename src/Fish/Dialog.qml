@@ -60,18 +60,19 @@ T.Dialog {
     contentItem: Item {}
 
     background: Rectangle {
-        radius: FishUI.Theme.hugeRadius
+        radius: FishUI.Theme.bigRadius
         color: FishUI.Theme.secondBackgroundColor
-        border.width: 0
+        border.width: 1 / Screen.devicePixelRatio
+        border.color: FishUI.Theme.glassBorderColor
 
         layer.enabled: true
         layer.effect: DropShadow {
             transparentBorder: true
-            radius: 32
-            samples: 32
+            radius: 12
+            samples: 13
             horizontalOffset: 0
-            verticalOffset: 0
-            color: Qt.rgba(0, 0, 0, 0.15)
+            verticalOffset: 3
+            color: Qt.rgba(0, 0, 0, FishUI.Theme.darkMode ? 0.20 : 0.08)
         }
     }
 

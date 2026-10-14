@@ -16,7 +16,8 @@ T.Frame {
 
     background: Rectangle {
         color: "transparent"
-        property color borderColor: FishUI.Theme.textColor
-        border.color: Qt.rgba(borderColor.r, borderColor.g, borderColor.b, 0.3)
+        radius: FishUI.Theme.smallRadius
+        border.width: 1
+        border.color: FishUI.Theme.glassBorderColor
     }
 }

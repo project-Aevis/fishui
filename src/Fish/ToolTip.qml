@@ -50,15 +50,7 @@ T.ToolTip {
         opacity: FishUI.Theme.blurEnabled ? 0.86 : 1
         color: FishUI.Theme.secondBackgroundColor
         radius: FishUI.Theme.smallRadius
-
-        layer.enabled: true
-        layer.effect: DropShadow {
-            transparentBorder: true
-            radius: 8
-            samples: 12
-            horizontalOffset: 0
-            verticalOffset: 0
-            color: Qt.rgba(0, 0, 0, 0.15)
-        }
+        border.width: 1 / Screen.devicePixelRatio
+        border.color: FishUI.Theme.glassBorderColor
     }
 }

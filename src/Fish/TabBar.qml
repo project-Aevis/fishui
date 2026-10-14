@@ -40,19 +40,11 @@ T.TabBar {
                     fill: parent
                     margins: 2
                 }
-                color: FishUI.Theme.darkMode ? Qt.lighter(FishUI.Theme.secondBackgroundColor, 2)
+                color: FishUI.Theme.darkMode ? Qt.lighter(FishUI.Theme.secondBackgroundColor, 1.4)
                                              : FishUI.Theme.secondBackgroundColor
                 radius: FishUI.Theme.smallRadius
-
-                layer.enabled: FishUI.Theme.darkMode
-                layer.effect: DropShadow {
-                    transparentBorder: true
-                    radius: 2
-                    samples: 2
-                    horizontalOffset: 0
-                    verticalOffset: 0
-                    color: Qt.rgba(0, 0, 0, 0.11)
-                }
+                border.width: 1 / FishUI.Dpi.ratio
+                border.color: FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0, 0, 0, 0.05)
             }
         }
     }

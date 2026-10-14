@@ -23,7 +23,10 @@ T.TabButton {
         elide: Text.ElideRight
 
         text: control.text
-        font: control.font
-        color: !control.enabled ? FishUI.Theme.disabledTextColor : control.pressed ? pressedColor : control.checked ? FishUI.Theme.textColor : FishUI.Theme.textColor
+        color: !control.enabled ? FishUI.Theme.disabledTextColor
+                                : control.pressed ? pressedColor
+                                : control.checked ? FishUI.Theme.textColor
+                                                  : (FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.65) : Qt.rgba(0, 0, 0, 0.55))
+        font.weight: control.checked ? Font.DemiBold : Font.Normal
     }
 }

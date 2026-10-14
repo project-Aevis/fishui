@@ -82,7 +82,7 @@ T.TextField {
         radius: FishUI.Theme.smallRadius
 
         border.width: 1
-        border.color: control.activeFocus ? FishUI.Theme.highlightColor : FishUI.Theme.alternateBackgroundColor
+        border.color: control.activeFocus ? FishUI.Theme.highlightColor : FishUI.Theme.glassBorderColor
 
         // Rectangle {
         //     id: _border

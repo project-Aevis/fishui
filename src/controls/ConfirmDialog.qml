@@ -81,31 +81,20 @@ FishUI.Window {
         height: control.dialogHeight
         radius: FishUI.Theme.bigRadius
         color: FishUI.Theme.darkMode
-               ? Qt.rgba(0.12, 0.12, 0.16, 0.75)
-               : Qt.rgba(0.97, 0.97, 0.99, 0.80)
+               ? Qt.rgba(0.12, 0.12, 0.16, 0.85)
+               : Qt.rgba(0.97, 0.97, 0.99, 0.90)
 
         border.width: 1 / Screen.devicePixelRatio
         border.color: FishUI.Theme.glassBorderColor
 
-        // Specular glass highlight at the top border
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.leftMargin: parent.radius
-            anchors.rightMargin: parent.radius
-            height: 1
-            color: FishUI.Theme.glassSpecularColor
-        }
-
         layer.enabled: true
         layer.effect: DropShadow {
             transparentBorder: true
-            radius: 28
-            samples: 29
+            radius: 12
+            samples: 13
             horizontalOffset: 0
-            verticalOffset: 8
-            color: Qt.rgba(0, 0, 0, 0.30)
+            verticalOffset: 4
+            color: Qt.rgba(0, 0, 0, FishUI.Theme.darkMode ? 0.20 : 0.08)
         }
 
         // Prevent clicks inside the card from reaching the backdrop MouseArea

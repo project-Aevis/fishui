@@ -1,4 +1,6 @@
 import QtQuick
+import QtQuick.Window
+import Qt5Compat.GraphicalEffects
 import FishUI 1.0 as FishUI
 
 Item {
@@ -37,7 +39,9 @@ Item {
         radius: width / 2
         color: "white"
         opacity: control.enabled ? 1 : 0.65
-        scale: control.pressed ? 0.8 : 1
+        border.width: 1 / Screen.devicePixelRatio
+        border.color: Qt.rgba(0, 0, 0, 0.08)
+        scale: control.pressed ? 0.85 : 1
 
         Behavior on scale {
             NumberAnimation {

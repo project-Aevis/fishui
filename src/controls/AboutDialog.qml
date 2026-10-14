@@ -28,13 +28,7 @@ FishUI.Window {
     property string link: "https://cutefishos.com"
     property var contentHeight: _mainLayout.implicitHeight + control.header.height * 2
 
-    background.opacity: FishUI.Theme.blurEnabled ? 0.6 : 1
-
-    FishUI.WindowBlur {
-        view: control
-        windowRadius: control.windowRadius
-        enabled: FishUI.Theme.blurEnabled
-    }
+    background.opacity: FishUI.Theme.blurEnabled ? (FishUI.Theme.darkMode ? 0.75 : 0.78) : 1
 
     ColumnLayout {
         id: _mainLayout

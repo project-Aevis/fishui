@@ -40,26 +40,17 @@ Item {
     Rectangle {
         id: _background
         anchors.fill: parent
-        color: FishUI.Theme.darkMode ? Qt.rgba(0.12, 0.14, 0.20, 0.75)
-                                     : Qt.rgba(0.95, 0.96, 0.98, 0.82)
+        color: control.blurEnabled
+               ? (FishUI.Theme.darkMode ? Qt.rgba(0.12, 0.14, 0.20, 0.75) : Qt.rgba(0.95, 0.96, 0.98, 0.82))
+               : FishUI.Theme.secondBackgroundColor
         radius: FishUI.Theme.mediumRadius
         border.color: FishUI.Theme.glassBorderColor
         border.width: 1 / FishUI.Dpi.ratio
 
-        // Inner Specular Glass Rim
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: 1
-            radius: Math.max(0, _background.radius - 1)
-            color: "transparent"
-            border.width: 1 / FishUI.Dpi.ratio
-            border.color: FishUI.Theme.glassSpecularColor
-        }
-
         FishUI.WindowShadow {
             view: control.view
             radius: _background.radius
-            strength: 0.5
+            strength: 0.35
             enabled: !!control.view
         }
 

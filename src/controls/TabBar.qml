@@ -28,6 +28,7 @@ Item {
     id: control
 
     property bool newTabVisibile: true
+    property alias newTabVisible: control.newTabVisibile
     property alias model: _listView.model
     property alias delegate: _listView.delegate
     property alias count: _listView.count

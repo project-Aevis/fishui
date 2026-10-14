@@ -27,9 +27,8 @@
 
 static inline int calculateBlurRadius(qreal stdDev)
 {
-    // See https://www.w3.org/TR/SVG11/filters.html#feGaussianBlurElement
-    const qreal gaussianScaleFactor = (3.0 * qSqrt(2.0 * M_PI) / 4.0) * 1.5;
-    return qMax(2, qFloor(stdDev * gaussianScaleFactor + 0.5));
+    // True Gaussian blur radius: 3*sigma captures 99.7% of the Gaussian falloff
+    return qMax(2, qCeil(stdDev * 3.0));
 }
 
 static inline qreal calculateBlurStdDev(int radius)
@@ -44,168 +43,87 @@ static inline QSize calculateBlurExtent(int radius)
     return QSize(blurRadius, blurRadius);
 }
 
-struct BoxLobes
-{
-    int left;  ///< how many pixels sample to the left
-    int right; ///< how many pixels sample to the right
-};
-
 /**
- * Compute box filter parameters.
+ * Convolve the alpha channel of an ARGB32 image with a true separable 2D Gaussian kernel.
  *
- * @param radius The blur radius.
- * @returns Parameters for three box filters.
+ * @param image The input/output image.
+ * @param stdDev The standard deviation of the Gaussian filter.
  **/
-static QVector<BoxLobes> computeLobes(int radius)
+static void gaussianBlurAlpha(QImage &image, qreal stdDev)
 {
-    const int blurRadius = calculateBlurRadius(calculateBlurStdDev(radius));
-    const int z = blurRadius / 3;
-
-    int major;
-    int minor;
-    int final;
-
-    switch (blurRadius % 3) {
-    case 0:
-        major = z;
-        minor = z;
-        final = z;
-        break;
-
-    case 1:
-        major = z + 1;
-        minor = z;
-        final = z;
-        break;
-
-    case 2:
-        major = z + 1;
-        minor = z;
-        final = z + 1;
-        break;
-
-    default:
-        Q_UNREACHABLE();
-    }
-
-    Q_ASSERT(major + minor + final == blurRadius);
-
-    return {
-        {major, minor},
-        {minor, major},
-        {final, final}
-    };
-}
-
-/**
- * Process a row with a box filter.
- *
- * @param src The start of the row.
- * @param dst The destination.
- * @param width The width of the row, in pixels.
- * @param horizontalStride The number of bytes from one alpha value to the
- *    next alpha value.
- * @param verticalStride The number of bytes from one row to the next row.
- * @param lobes Params of the box filter.
- * @param transposeInput Whether the input is transposed.
- * @param transposeOutput Whether the output should be transposed.
- **/
-static inline void boxBlurRowAlpha(const uint8_t *src, uint8_t *dst, int width, int horizontalStride,
-                                   int verticalStride, const BoxLobes &lobes, bool transposeInput,
-                                   bool transposeOutput)
-{
-    const int inputStep = transposeInput ? verticalStride : horizontalStride;
-    const int outputStep = transposeOutput ? verticalStride : horizontalStride;
-
-    const int boxSize = lobes.left + 1 + lobes.right;
-    const int reciprocal = (1 << 24) / boxSize;
-
-    uint32_t alphaSum = (boxSize + 1) / 2;
-
-    const uint8_t *left = src;
-    const uint8_t *right = src;
-    uint8_t *out = dst;
-
-    const uint8_t firstValue = src[0];
-    const uint8_t lastValue = src[(width - 1) * inputStep];
-
-    alphaSum += firstValue * lobes.left;
-
-    const uint8_t *initEnd = src + (boxSize - lobes.left) * inputStep;
-    while (right < initEnd) {
-        alphaSum += *right;
-        right += inputStep;
-    }
-
-    const uint8_t *leftEnd = src + boxSize * inputStep;
-    while (right < leftEnd) {
-        *out = (alphaSum * reciprocal) >> 24;
-        alphaSum += *right - firstValue;
-        right += inputStep;
-        out += outputStep;
-    }
-
-    const uint8_t *centerEnd = src + width * inputStep;
-    while (right < centerEnd) {
-        *out = (alphaSum * reciprocal) >> 24;
-        alphaSum += *right - *left;
-        left += inputStep;
-        right += inputStep;
-        out += outputStep;
-    }
-
-    const uint8_t *rightEnd = dst + width * outputStep;
-    while (out < rightEnd) {
-        *out = (alphaSum * reciprocal) >> 24;
-        alphaSum += lastValue - *left;
-        left += inputStep;
-        out += outputStep;
-    }
-}
-
-/**
- * Blur the alpha channel of a given image.
- *
- * @param image The input image.
- * @param radius The blur radius.
- * @param rect Specifies what part of the image to blur. If nothing is provided, then
- *    the whole alpha channel of the input image will be blurred.
- **/
-static inline void boxBlurAlpha(QImage &image, int radius, const QRect &rect = {})
-{
-    if (radius < 2) {
+    if (stdDev < 0.2) {
         return;
     }
 
-    const QVector<BoxLobes> lobes = computeLobes(radius);
-
-    const QRect blurRect = rect.isNull() ? image.rect() : rect;
-
-    const int alphaOffset = QSysInfo::ByteOrder == QSysInfo::BigEndian ? 0 : 3;
-    const int width = blurRect.width();
-    const int height = blurRect.height();
-    const int rowStride = image.bytesPerLine();
-    const int pixelStride = image.depth() >> 3;
-
-    const int bufferStride = qMax(width, height) * pixelStride;
-    QScopedPointer<uint8_t, QScopedPointerArrayDeleter<uint8_t> > buf(new uint8_t[2 * bufferStride]);
-    uint8_t *buf1 = buf.data();
-    uint8_t *buf2 = buf1 + bufferStride;
-
-    // Blur the image in horizontal direction.
-    for (int i = 0; i < height; ++i) {
-        uint8_t *row = image.scanLine(blurRect.y() + i) + blurRect.x() * pixelStride + alphaOffset;
-        boxBlurRowAlpha(row, buf1, width, pixelStride, rowStride, lobes[0], false, false);
-        boxBlurRowAlpha(buf1, buf2, width, pixelStride, rowStride, lobes[1], false, false);
-        boxBlurRowAlpha(buf2, row, width, pixelStride, rowStride, lobes[2], false, false);
+    const int width = image.width();
+    const int height = image.height();
+    if (width <= 0 || height <= 0) {
+        return;
     }
 
-    // Blur the image in vertical direction.
-    for (int i = 0; i < width; ++i) {
-        uint8_t *column = image.scanLine(blurRect.y()) + (blurRect.x() + i) * pixelStride + alphaOffset;
-        boxBlurRowAlpha(column, buf1, height, pixelStride, rowStride, lobes[0], true, false);
-        boxBlurRowAlpha(buf1, buf2, height, pixelStride, rowStride, lobes[1], false, false);
-        boxBlurRowAlpha(buf2, column, height, pixelStride, rowStride, lobes[2], false, true);
+    const int kRadius = qMax(1, qCeil(stdDev * 3.0));
+    const int kernelSize = 2 * kRadius + 1;
+
+    QVector<float> kernel(kernelSize);
+    const float twoSigmaSq = 2.0f * static_cast<float>(stdDev * stdDev);
+    float kernelSum = 0.0f;
+    for (int i = -kRadius; i <= kRadius; ++i) {
+        float val = std::exp(-(i * i) / twoSigmaSq);
+        kernel[i + kRadius] = val;
+        kernelSum += val;
+    }
+    for (int i = 0; i < kernelSize; ++i) {
+        kernel[i] /= kernelSum;
+    }
+
+    const int alphaOffset = QSysInfo::ByteOrder == QSysInfo::BigEndian ? 0 : 3;
+    const int pixelStride = image.depth() >> 3;
+
+    QVector<float> buffer(width * height);
+
+    // Pass 1: Horizontal Gaussian blur (image -> buffer)
+    for (int y = 0; y < height; ++y) {
+        const uint8_t *srcRow = image.constScanLine(y) + alphaOffset;
+        float *dstRow = buffer.data() + y * width;
+        for (int x = 0; x < width; ++x) {
+            float sum = srcRow[x * pixelStride] * kernel[kRadius];
+            for (int k = 1; k <= kRadius; ++k) {
+                const float w = kernel[kRadius + k];
+                const int leftX = x - k;
+                const int rightX = x + k;
+                float sampleSum = 0.0f;
+                if (leftX >= 0) {
+                    sampleSum += srcRow[leftX * pixelStride];
+                }
+                if (rightX < width) {
+                    sampleSum += srcRow[rightX * pixelStride];
+                }
+                sum += sampleSum * w;
+            }
+            dstRow[x] = sum;
+        }
+    }
+
+    // Pass 2: Vertical Gaussian blur (buffer -> image)
+    for (int y = 0; y < height; ++y) {
+        uint8_t *dstRow = image.scanLine(y) + alphaOffset;
+        for (int x = 0; x < width; ++x) {
+            float sum = buffer[y * width + x] * kernel[kRadius];
+            for (int k = 1; k <= kRadius; ++k) {
+                const float w = kernel[kRadius + k];
+                const int topY = y - k;
+                const int bottomY = y + k;
+                float sampleSum = 0.0f;
+                if (topY >= 0) {
+                    sampleSum += buffer[topY * width + x];
+                }
+                if (bottomY < height) {
+                    sampleSum += buffer[bottomY * width + x];
+                }
+                sum += sampleSum * w;
+            }
+            dstRow[x * pixelStride] = static_cast<uint8_t>(qBound(0.0f, sum + 0.5f, 255.0f));
+        }
     }
 }
 
@@ -231,7 +149,7 @@ static inline void mirrorTopLeftQuadrant(QImage &image)
 
     for (int y = 0; y < centerY; ++y) {
         const uint8_t *in = image.scanLine(y) + alphaOffset;
-        uint8_t *out = image.scanLine(width - y - 1) + alphaOffset;
+        uint8_t *out = image.scanLine(height - y - 1) + alphaOffset;
 
         for (int x = 0; x < width; ++x, in += stride, out += stride) {
             *out = *in;
@@ -264,11 +182,8 @@ static void renderShadow(QPainter *painter, const QRect &rect, qreal borderRadiu
     shadowPainter.drawRoundedRect(boxRect, xRadius, yRadius);
     shadowPainter.end();
 
-    // Because the shadow texture is symmetrical, that's enough to blur
-    // only the top-left quadrant and then mirror it.
-    const QRect blurRect(0, 0, qCeil(shadow.width() * 0.5), qCeil(shadow.height() * 0.5));
-    const int scaledRadius = qRound(radius * dpr);
-    boxBlurAlpha(shadow, scaledRadius, blurRect);
+    const qreal scaledStdDev = calculateBlurStdDev(radius) * dpr;
+    gaussianBlurAlpha(shadow, scaledStdDev);
     mirrorTopLeftQuadrant(shadow);
 
     // Give the shadow a tint of the desired color.

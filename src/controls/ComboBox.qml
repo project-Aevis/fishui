@@ -73,9 +73,9 @@ T.ComboBox {
         validator: control.validator
 
         font: control.font
-        color: control.enabled ? control.FishUI.Theme.textColor : control.FishUI.Theme.highlightColor
-        selectionColor:  control.FishUI.Theme.highlightColor
-        selectedTextColor: control.FishUI.Theme.highlightedTextColor
+        color: control.enabled ? FishUI.Theme.textColor : FishUI.Theme.disabledTextColor
+        selectionColor: FishUI.Theme.highlightColor
+        selectedTextColor: FishUI.Theme.highlightedTextColor
         verticalAlignment: Text.AlignVCenter
     }
 

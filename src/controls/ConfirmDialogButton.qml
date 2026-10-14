@@ -33,27 +33,18 @@ QQC2.Button {
     }
 
     background: Rectangle {
-        radius: 10
+        radius: FishUI.Theme.smallRadius
         border.width: 1
-        border.color: control.primary ? Qt.darker(control.actionColor, 1.25)
-                                     : (FishUI.Theme.darkMode ? "#545455" : "#d9dadd")
+        border.color: control.primary ? "transparent"
+                                     : (FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0, 0, 0, 0.06))
         color: {
             if (control.enabled && control.down)
-                return Qt.darker(control.surfaceColor, 1.08)
+                return Qt.darker(control.surfaceColor, 1.12)
             if (control.enabled && control.hovered)
                 return control.primary || FishUI.Theme.darkMode
-                        ? Qt.lighter(control.surfaceColor, 1.05)
-                        : Qt.darker(control.surfaceColor, 1.04)
+                        ? Qt.lighter(control.surfaceColor, 1.08)
+                        : Qt.darker(control.surfaceColor, 1.05)
             return control.surfaceColor
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: 1
-            radius: 9
-            color: "transparent"
-            border.width: 1
-            border.color: Qt.rgba(1, 1, 1, control.primary ? 0.2 : 0.08)
         }
 
         Rectangle {
@@ -62,7 +53,10 @@ QQC2.Button {
             radius: 13
             color: "transparent"
             border.width: 2
-            border.color: Qt.alpha(control.primary ? control.actionColor : FishUI.Theme.highlightColor, 0.3)
+            border.color: {
+                let c = control.primary ? control.actionColor : FishUI.Theme.highlightColor
+                return Qt.rgba(c.r, c.g, c.b, 0.3)
+            }
             visible: control.visualFocus
         }
     }

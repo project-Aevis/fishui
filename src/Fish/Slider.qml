@@ -22,19 +22,10 @@ T.Slider {
         radius: width / 2
         opacity: 1
         antialiasing: true
-        border.width: 0
+        border.width: 1 / Screen.devicePixelRatio
+        border.color: FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(0, 0, 0, 0.10)
 
-        color: control.pressed ? "#FAFAFA" : "white"
-
-        layer.enabled: true
-        layer.effect: DropShadow {
-            transparentBorder: true
-            radius: 8
-            samples: 12
-            horizontalOffset: 0
-            verticalOffset: 0
-            color: Qt.rgba(0, 0, 0, control.pressed ? 0.25 : 0.15)
-        }
+        color: control.pressed ? (FishUI.Theme.darkMode ? "#E0E0E0" : "#F0F0F0") : "white"
     }
 
     background: Item {
@@ -62,7 +53,7 @@ T.Slider {
             width: control.horizontal ? control.position * parent.width : sliderTrackHeight
             height: !control.horizontal ? control.position * parent.height : sliderTrackHeight
             radius: !control.horizontal ? parent.width / 2 : sliderTrackHeight / 2
-            color: control.FishUI.Theme.highlightColor
+            color: FishUI.Theme.highlightColor
         }
     }
 }

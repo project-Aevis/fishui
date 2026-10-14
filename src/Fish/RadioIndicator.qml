@@ -31,10 +31,10 @@ Rectangle {
     property Item control
 
     radius: width / 2
-    color: control.FishUI.Theme.backgroundColor
+    color: FishUI.Theme.backgroundColor
     border.color: control.down
-        ? control.checked ? "transparent" : control.FishUI.Theme.highlightColor
-        : control.checked ? control.FishUI.Theme.highlightColor : control.FishUI.Theme.disabledTextColor
+        ? control.checked ? "transparent" : FishUI.Theme.highlightColor
+        : control.checked ? FishUI.Theme.highlightColor : (!control.enabled ? FishUI.Theme.disabledTextColor : (FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.3) : Qt.rgba(0, 0, 0, 0.22)))
 
     border.width: 1
 
@@ -43,7 +43,7 @@ Rectangle {
         radius: parent.radius
         scale: control.checked ? 1.0 : 0.0
 
-        color: control.FishUI.Theme.highlightColor
+        color: FishUI.Theme.highlightColor
 
         Behavior on scale {
             NumberAnimation {

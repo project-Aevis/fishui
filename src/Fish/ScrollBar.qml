@@ -25,8 +25,8 @@ T.ScrollBar {
         implicitWidth: control.interactive ? 6 : 4
         implicitHeight: control.interactive ? 6 : 4
 
-        color: control.pressed ? FishUI.Theme.darkMode ? Qt.rgba(255, 255, 255, 0.4) : Qt.rgba(0, 0, 0, 0.5)
-                               : FishUI.Theme.darkMode ? Qt.rgba(255, 255, 255, 0.5) : Qt.rgba(0, 0, 0, 0.4)
+        color: control.pressed ? (FishUI.Theme.darkMode ? Qt.rgba(255, 255, 255, 0.6) : Qt.rgba(0, 0, 0, 0.55))
+                               : (FishUI.Theme.darkMode ? Qt.rgba(255, 255, 255, 0.35) : Qt.rgba(0, 0, 0, 0.35))
         opacity: 0.0
     }
 

@@ -42,6 +42,7 @@ Window {
     // Window helper
     property var contentTopMargin: _header.height
     property var windowRadius: FishUI.Theme.windowRadius
+    property bool blurEnabled: FishUI.Theme.blurEnabled
     property alias helper: windowHelper
 
     // Other
@@ -96,9 +97,10 @@ Window {
     }
 
     FishUI.WindowBlur {
+        id: _windowBlur
         view: control
         windowRadius: control.windowRadius
-        enabled: FishUI.Theme.blurEnabled
+        enabled: control.blurEnabled
     }
 
     // Left bottom edge

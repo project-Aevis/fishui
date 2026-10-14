@@ -36,23 +36,23 @@ QtObject {
     property color orangeColor: FishUICore.ThemeManager.orangeColor
     property color greyColor: FishUICore.ThemeManager.greyColor
 
-    property color backgroundColor: darkMode ? "#1C1C1D" : "#F6F6F7"
-    property color secondBackgroundColor: darkMode ? "#2C2C2D" : "#FFFFFF"
-    property color alternateBackgroundColor: darkMode ? "#3C3C3D" : "#F2F4F5"
+    property color backgroundColor: darkMode ? "#18181A" : "#F1F3F5"
+    property color secondBackgroundColor: darkMode ? "#242426" : "#FFFFFF"
+    property color alternateBackgroundColor: darkMode ? "#2E2E32" : "#EAECEF"
 
-    property color textColor: darkMode ? "#FFFFFF" : "#323238"
-    property color disabledTextColor: darkMode ? "#888888" : "#64646E"
+    property color textColor: darkMode ? "#FFFFFF" : "#1A1A1A"
+    property color disabledTextColor: darkMode ? "#8A8A8E" : "#8E8E93"
 
     property color highlightColor: FishUICore.ThemeManager.accentColor
     property color highlightedTextColor: darkMode ? "#FFFFFF" : "#FFFFFF"
 
-    property color activeTextColor: "#0176D3"
-    property color activeBackgroundColor: "#0176D3"
+    property color activeTextColor: "#007AFF"
+    property color activeBackgroundColor: "#007AFF"
 
-    property color linkColor: "#2196F3"
-    property color linkBackgroundColor: "#2196F3"
-    property color visitedLinkColor: "#2196F3"
-    property color visitedLinkBackgroundColor: "#2196F3"
+    property color linkColor: "#007AFF"
+    property color linkBackgroundColor: "#007AFF"
+    property color visitedLinkColor: "#007AFF"
+    property color visitedLinkBackgroundColor: "#007AFF"
 
     property real fontSize: FishUICore.ThemeManager.fontSize
     property string fontFamily: FishUICore.ThemeManager.fontFamily

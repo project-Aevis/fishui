@@ -45,10 +45,10 @@ Rectangle {
     implicitWidth: 18
     implicitHeight: 18
 
-    color: !control.enabled ? control.FishUI.Theme.secondBackgroundColor
-                            : checked ? FishUI.Theme.highlightColor : control.FishUI.Theme.secondBackgroundColor
-    border.color: !control.enabled ? control.FishUI.Theme.disabledTextColor
-        : checked ? control.FishUI.Theme.highlightColor: control.FishUI.Theme.textColor
+    color: !control.enabled ? FishUI.Theme.secondBackgroundColor
+                            : checked ? FishUI.Theme.highlightColor : FishUI.Theme.secondBackgroundColor
+    border.color: !control.enabled ? FishUI.Theme.disabledTextColor
+        : checked ? FishUI.Theme.highlightColor : (FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.3) : Qt.rgba(0, 0, 0, 0.22))
     border.width: 1
     radius: control.autoExclusive ? Math.min(height, width) : 4
 
@@ -78,8 +78,8 @@ Rectangle {
         anchors.centerIn: parent
 
         property color strokeColor: !indicatorItem.control.enabled
-                                    ? indicatorItem.control.FishUI.Theme.disabledTextColor
-                                    : indicatorItem.control.FishUI.Theme.highlightedTextColor
+                                    ? FishUI.Theme.disabledTextColor
+                                    : FishUI.Theme.highlightedTextColor
 
         onStrokeColorChanged: requestPaint()
 
