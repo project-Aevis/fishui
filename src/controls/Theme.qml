@@ -54,7 +54,7 @@ QtObject {
     property color visitedLinkColor: "#007AFF"
     property color visitedLinkBackgroundColor: "#007AFF"
 
-    property real fontSize: FishUICore.ThemeManager.fontSize
+    property real fontSize: FishUICore.ThemeManager.fontSize > 0 ? FishUICore.ThemeManager.fontSize : 10.5
     property string fontFamily: FishUICore.ThemeManager.fontFamily
 
     property real smallRadius: 8.0
@@ -70,15 +70,10 @@ QtObject {
     property var renderType: Text.QtRendering
 
     property font defaultFont: fontMetrics.font
-    property font smallFont: {
-        let font = fontMetrics.font
-        if (font.pixelSize > 0) {
-            font.pixelSize = Math.max(1, font.pixelSize - 1)
-        } else {
-            font.pointSize = Math.max(1, font.pointSize - 1)
-        }
-        return font
-    }
+    property font smallFont: Qt.font({
+        family: theme.fontFamily,
+        pointSize: Math.max(1, theme.fontSize - 1)
+    })
 
     property list<QtObject> children: [
         TextMetrics {

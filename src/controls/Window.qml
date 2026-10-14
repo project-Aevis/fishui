@@ -49,7 +49,7 @@ Window {
     // Other
     property bool isMaximized: control.visibility === Window.Maximized
     property bool isFullScreen: control.visibility === Window.FullScreen
-    property var edgeSize: windowRadius <= 0 ? 8 : windowRadius / 2
+    property int edgeSize: 10
 
     // Resize
     property bool widthResizable: maximumWidth > minimumWidth
@@ -57,6 +57,7 @@ Window {
 
     property bool minimizeButtonVisible: true
     property bool windowButtonsVisible: true
+    property bool headerDarkMode: FishUI.Theme.darkMode
 
     property var windowButtonsAlignment: Qt.AlignTop
     property real windowButtonsTopMargin: FishUI.Units.smallSpacing
@@ -104,7 +105,41 @@ Window {
         enabled: control.blurEnabled
     }
 
-    // Left bottom edge
+    // Top Left corner
+    MouseArea {
+        width: edgeSize * 2
+        height: edgeSize * 2
+        anchors.top: parent.top
+        anchors.left: parent.left
+        cursorShape: Qt.SizeFDiagCursor
+        propagateComposedEvents: true
+        preventStealing: false
+        visible: !isMaximized && !isFullScreen
+                              && control.widthResizable
+                              && control.heightResizable
+        z: 999
+
+        onPressed: windowHelper.startSystemResize(control, Qt.LeftEdge | Qt.TopEdge)
+    }
+
+    // Top Right corner
+    MouseArea {
+        width: edgeSize * 2
+        height: edgeSize * 2
+        anchors.top: parent.top
+        anchors.right: parent.right
+        cursorShape: Qt.SizeBDiagCursor
+        propagateComposedEvents: true
+        preventStealing: false
+        visible: !isMaximized && !isFullScreen
+                              && control.widthResizable
+                              && control.heightResizable
+        z: 999
+
+        onPressed: windowHelper.startSystemResize(control, Qt.RightEdge | Qt.TopEdge)
+    }
+
+    // Left bottom corner
     MouseArea {
         height: edgeSize * 2
         width: height
@@ -121,7 +156,7 @@ Window {
         onPressed: windowHelper.startSystemResize(control, Qt.LeftEdge | Qt.BottomEdge)
     }
 
-    // Right bottom edge
+    // Right bottom corner
     MouseArea {
         height: edgeSize * 2
         width: height
@@ -140,7 +175,7 @@ Window {
 
     // Top edge
     MouseArea {
-        height: edgeSize / 2
+        height: edgeSize
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
@@ -148,6 +183,8 @@ Window {
         anchors.rightMargin: edgeSize * 2
         visible: !isMaximized && !isFullScreen && control.heightResizable
         cursorShape: Qt.SizeVerCursor
+        propagateComposedEvents: true
+        preventStealing: false
         z: 999
 
         onPressed: windowHelper.startSystemResize(control, Qt.TopEdge)
@@ -155,13 +192,15 @@ Window {
 
     // Bottom edge
     MouseArea {
-        height: edgeSize / 2
+        height: edgeSize
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.leftMargin: edgeSize * 2
         anchors.rightMargin: edgeSize * 2
         cursorShape: Qt.SizeVerCursor
+        propagateComposedEvents: true
+        preventStealing: false
         visible: !isMaximized && !isFullScreen && control.heightResizable
         z: 999
 
@@ -170,13 +209,15 @@ Window {
 
     // Left edge
     MouseArea {
-        width: edgeSize / 2
+        width: edgeSize
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.topMargin: edgeSize
+        anchors.topMargin: edgeSize * 2
         anchors.bottomMargin: edgeSize * 2
         cursorShape: Qt.SizeHorCursor
+        propagateComposedEvents: true
+        preventStealing: false
         visible: !isMaximized && !isFullScreen && control.widthResizable
         z: 999
 
@@ -185,13 +226,15 @@ Window {
 
     // Right edge
     MouseArea {
-        width: edgeSize / 2
+        width: edgeSize
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.leftMargin: edgeSize
+        anchors.topMargin: edgeSize * 2
         anchors.bottomMargin: edgeSize * 2
         cursorShape: Qt.SizeHorCursor
+        propagateComposedEvents: true
+        preventStealing: false
         visible: !isMaximized && !isFullScreen && control.widthResizable
         z: 999
 
@@ -294,7 +337,7 @@ Window {
                 anchors.fill: parent
                 spacing: 0
 
-                // macOS Traffic Lights Window Controls (Left side)
+                // Traffic Lights Window Controls (Left side)
                 Item {
                     id: trafficLightsContainer
                     implicitWidth: trafficLightsRow.implicitWidth

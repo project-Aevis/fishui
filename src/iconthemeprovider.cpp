@@ -1,6 +1,7 @@
 #include "iconthemeprovider.h"
 #include <QFile>
 #include <QIcon>
+#include <QPixmapCache>
 
 IconThemeProvider::IconThemeProvider()
     : QQuickImageProvider(QQuickImageProvider::Pixmap)
@@ -21,16 +22,30 @@ QPixmap IconThemeProvider::requestPixmap(const QString &id, QSize *realSize,
     if (realSize)
         *realSize = size;
 
+    const QString cacheKey = QStringLiteral("cf_icontheme_%1_%2x%3")
+        .arg(id).arg(size.width()).arg(size.height());
+
+    QPixmap cachedPix;
+    if (QPixmapCache::find(cacheKey, &cachedPix)) {
+        return cachedPix;
+    }
+
     if (QFile::exists(id) || id.startsWith(QLatin1Char('/'))) {
         if (id.endsWith(QLatin1String(".svg"), Qt::CaseInsensitive)
             || id.endsWith(QLatin1String(".svgz"), Qt::CaseInsensitive)) {
             QIcon svgIcon(id);
-            if (!svgIcon.isNull())
-                return svgIcon.pixmap(size);
+            if (!svgIcon.isNull()) {
+                cachedPix = svgIcon.pixmap(size);
+                QPixmapCache::insert(cacheKey, cachedPix);
+                return cachedPix;
+            }
         }
         QPixmap pix(id);
-        if (!pix.isNull())
-            return pix.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        if (!pix.isNull()) {
+            cachedPix = pix.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            QPixmapCache::insert(cacheKey, cachedPix);
+            return cachedPix;
+        }
     }
 
     // Return icon from theme or fallback to a generic icon
@@ -46,5 +61,7 @@ QPixmap IconThemeProvider::requestPixmap(const QString &id, QSize *realSize,
     if (icon.isNull())
         icon = QIcon::fromTheme(QLatin1String("application-x-desktop"));
 
-    return icon.pixmap(size);
+    cachedPix = icon.pixmap(size);
+    QPixmapCache::insert(cacheKey, cachedPix);
+    return cachedPix;
 }

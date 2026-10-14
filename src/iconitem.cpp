@@ -25,12 +25,13 @@
 #include <QPainter>
 #include <QIcon>
 #include <QFileInfo>
+#include <QPixmapCache>
 
 IconItem::IconItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
 {
     setFlag(ItemHasContents, true);
-    setRenderTarget(QQuickPaintedItem::Image);
+    setRenderTarget(QQuickPaintedItem::FramebufferObject);
     setSmooth(true);
     setAntialiasing(true);
     setMipmap(true);
@@ -186,6 +187,22 @@ void IconItem::loadPixmap()
         return;
     }
 
+    QString iconIdentifier = m_iconName;
+    if (iconIdentifier.isEmpty() && m_source.isValid()) {
+        iconIdentifier = m_source.toString();
+    }
+
+    const QString cacheKey = !iconIdentifier.isEmpty()
+        ? QStringLiteral("cf_ii_%1_%2x%3_%4")
+            .arg(iconIdentifier).arg(size.width()).arg(size.height()).arg(scale)
+        : QString();
+
+    if (!cacheKey.isEmpty() && !m_color.isValid() && QPixmapCache::find(cacheKey, &result)) {
+        m_iconPixmap = result;
+        update();
+        return;
+    }
+
     if (!m_iconName.isEmpty()) {
         QIcon icon = QIcon::fromTheme(m_iconName);
 
@@ -203,21 +220,36 @@ void IconItem::loadPixmap()
         return;
     }
 
+    if (!cacheKey.isEmpty() && !m_color.isValid() && !result.isNull()) {
+        QPixmapCache::insert(cacheKey, result);
+    }
+
     // Tinted here rather than with a QML layer/ColorOverlay: a layer's FBO is
     // resampled at the item's position, which softens the icon whenever that
     // position is not on a whole device pixel.
     if (m_color.isValid() && !result.isNull()) {
-        QPixmap tinted(result.size());
-        tinted.setDevicePixelRatio(result.devicePixelRatio());
-        tinted.fill(Qt::transparent);
+        const QString tintKey = !cacheKey.isEmpty()
+            ? cacheKey + QStringLiteral("_c%1").arg(m_color.rgba(), 8, 16, QLatin1Char('0'))
+            : QString();
+        QPixmap tinted;
+        if (!tintKey.isEmpty() && QPixmapCache::find(tintKey, &tinted)) {
+            result = tinted;
+        } else {
+            tinted = QPixmap(result.size());
+            tinted.setDevicePixelRatio(result.devicePixelRatio());
+            tinted.fill(Qt::transparent);
 
-        QPainter p(&tinted);
-        p.drawPixmap(0, 0, result);
-        p.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        p.fillRect(tinted.rect(), m_color);
-        p.end();
+            QPainter p(&tinted);
+            p.drawPixmap(0, 0, result);
+            p.setCompositionMode(QPainter::CompositionMode_SourceIn);
+            p.fillRect(tinted.rect(), m_color);
+            p.end();
 
-        result = tinted;
+            if (!tintKey.isEmpty()) {
+                QPixmapCache::insert(tintKey, tinted);
+            }
+            result = tinted;
+        }
     }
 
     m_iconPixmap = result;
