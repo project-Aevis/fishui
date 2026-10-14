@@ -43,6 +43,7 @@ Window {
     property var contentTopMargin: _header.height
     property var windowRadius: FishUI.Theme.windowRadius
     property bool blurEnabled: FishUI.Theme.blurEnabled
+    property bool clipContent: true
     property alias helper: windowHelper
 
     // Other
@@ -422,20 +423,24 @@ Window {
             }
         }
 
+        Item {
+            id: _maskSourceItem
+            anchors.fill: parent
+            visible: false
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: control._borderWidth
+                radius: Math.max(0, _background.radius - control._borderWidth)
+            }
+        }
+
         // Mask. Inset by the border so opaque content (a sidebar, a view
         // background) stops at the hairline instead of painting over it.
-        layer.enabled: _background.radius > 0
+        layer.enabled: control.clipContent && _background.radius > 0
+        layer.smooth: true
         layer.effect: OpacityMask {
-            maskSource: Item {
-                width: _contentItem.width
-                height: _contentItem.height
-
-                Rectangle {
-                    anchors.fill: parent
-                    anchors.margins: control._borderWidth
-                    radius: Math.max(0, _background.radius - control._borderWidth)
-                }
-            }
+            maskSource: _maskSourceItem
         }
     }
 

@@ -58,10 +58,10 @@ QtObject {
     property string fontFamily: FishUICore.ThemeManager.fontFamily
 
     property real smallRadius: 8.0
-    property real mediumRadius: 12.0
-    property real bigRadius: 16.0
-    property real hugeRadius: 20.0
-    property real windowRadius: 24.0
+    property real mediumRadius: 10.0
+    property real bigRadius: 12.0
+    property real hugeRadius: 14.0
+    property real windowRadius: 14.0
 
     property color glassBorderColor: darkMode ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(1, 1, 1, 0.85)
     property color glassSpecularColor: darkMode ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.60)
