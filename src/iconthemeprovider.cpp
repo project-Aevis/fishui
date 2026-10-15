@@ -11,12 +11,12 @@ IconThemeProvider::IconThemeProvider()
 QPixmap IconThemeProvider::requestPixmap(const QString &id, QSize *realSize,
                                          const QSize &requestedSize)
 {
-    // Sanitize requested size: default to 128 if not specified
+    // Sanitize requested size: default to 32x32 if not specified
     QSize size(requestedSize);
     if (size.width() < 1)
-        size.setWidth(128);
+        size.setWidth(32);
     if (size.height() < 1)
-        size.setHeight(128);
+        size.setHeight(32);
 
     // Return real size
     if (realSize)
