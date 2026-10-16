@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2026 Project Aevis Contributors.
  *
  * Author:     cutefish <cutefishos@foxmail.com>
  *
@@ -37,33 +38,12 @@ ThemeManager::ThemeManager(QObject *parent)
 
 void ThemeManager::updateAccentColor()
 {
-    switch (m_appearance.accentColorIndex()) {
-    case ACCENTCOLOR_BLUE:
-        m_accentColor = m_blueColor;
-        break;
-    case ACCENTCOLOR_RED:
-        m_accentColor = m_redColor;
-        break;
-    case ACCENTCOLOR_GREEN:
-        m_accentColor = m_greenColor;
-        break;
-    case ACCENTCOLOR_PURPLE:
-        m_accentColor = m_purpleColor;
-        break;
-    case ACCENTCOLOR_PINK:
-        m_accentColor = m_pinkColor;
-        break;
-    case ACCENTCOLOR_ORANGE:
-        m_accentColor = m_orangeColor;
-        break;
-    case ACCENTCOLOR_GREY:
-        m_accentColor = m_greyColor;
-        break;
-    default:
-        m_accentColor = m_blueColor;
-        break;
-    }
-
+    const QColor colors[] = {
+        m_blueColor, m_redColor, m_greenColor, m_purpleColor,
+        m_pinkColor, m_orangeColor, m_greyColor
+    };
+    const int idx = m_appearance.accentColorIndex();
+    m_accentColor = (idx >= 0 && idx < 7) ? colors[idx] : m_blueColor;
     emit accentColorChanged();
 }
 

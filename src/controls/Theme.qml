@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2026 Project Aevis Contributors.
  *
  * Author:     revenmartin <revenmartin@gmail.com>
  *
@@ -55,7 +56,7 @@ QtObject {
     property color visitedLinkBackgroundColor: "#007AFF"
 
     property real fontSize: FishUICore.ThemeManager.fontSize > 0 ? FishUICore.ThemeManager.fontSize : 10.5
-    property string fontFamily: FishUICore.ThemeManager.fontFamily
+    property string fontFamily: FishUICore.ThemeManager.fontFamily ? FishUICore.ThemeManager.fontFamily : Qt.application.font.family
 
     property real smallRadius: 8.0
     property real mediumRadius: 10.0

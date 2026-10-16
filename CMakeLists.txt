@@ -10,6 +10,12 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
+if(ipo_supported)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
+
 #DEFAULT COMPONENTS DEFINITIONS
 option(COMPONENT_EDITOR "Build editor component" ON)
 option(COMPONENT_FM "Build filemanager component" ON)
@@ -45,7 +51,7 @@ include(GNUInstallDirs)
 include(ECMGenerateHeaders)
 
 # Get the installation directory from Qt 6
-find_program(QT_PATHS_EXECUTABLE NAMES qtpaths6 REQUIRED)
+find_program(QT_PATHS_EXECUTABLE NAMES qtpaths6 qtpaths PATHS /usr/lib/qt6/bin /usr/lib64/qt6/bin REQUIRED)
 
 execute_process(COMMAND ${QT_PATHS_EXECUTABLE} -query QT_INSTALL_QML
         OUTPUT_VARIABLE INSTALL_QMLDIR

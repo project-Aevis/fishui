@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2026 Project Aevis Contributors.
  *
  * Author:     cutefish <cutefishos@foxmail.com>
  *
@@ -730,15 +731,27 @@ bool MenuPopupWindow::event(QEvent *event)
     if (event->type() == QEvent::TouchBegin && !qobject_cast<MenuPopupWindow*>(transientParent())) {
         QRect rect = QRect(QPoint(), size());
         QTouchEvent *touch = static_cast<QTouchEvent*>(event);
-        QTouchEvent::TouchPoint point = touch->touchPoints().first();
-        if ((point.state() == Qt::TouchPointPressed) && !rect.contains(point.pos().toPoint())) {
-          //first default handling
-          bool result = QQuickWindow::event(event);
-          //now specific broken case
-          if (!m_dismissed)
-              dismissPopup();
-          return result;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (!touch->points().isEmpty()) {
+            QEventPoint point = touch->points().first();
+            if ((point.state() == QEventPoint::Pressed) && !rect.contains(point.position().toPoint())) {
+                bool result = QQuickWindow::event(event);
+                if (!m_dismissed)
+                    dismissPopup();
+                return result;
+            }
         }
+#else
+        if (!touch->touchPoints().isEmpty()) {
+            QTouchEvent::TouchPoint point = touch->touchPoints().first();
+            if ((point.state() == Qt::TouchPointPressed) && !rect.contains(point.pos().toPoint())) {
+                bool result = QQuickWindow::event(event);
+                if (!m_dismissed)
+                    dismissPopup();
+                return result;
+            }
+        }
+#endif
     }
 
     return QQuickWindow::event(event);

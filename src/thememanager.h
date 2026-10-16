@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2026 Project Aevis Contributors.
  *
  * Author:     cutefish <cutefishos@foxmail.com>
  *
@@ -24,6 +25,7 @@
 #include <QHash>
 #include <QFont>
 #include <QColor>
+#include <QGuiApplication>
 
 #define ACCENTCOLOR_BLUE   0
 #define ACCENTCOLOR_RED    1
@@ -57,7 +59,10 @@ public:
 
     QColor accentColor() const { return m_accentColor; }
     qreal fontSize() const { return m_appearance.fontPointSize(); }
-    QString fontFamily() const { return m_appearance.fontFamily(); }
+    QString fontFamily() const {
+        const QString font = m_appearance.fontFamily();
+        return !font.isEmpty() ? font : QGuiApplication::font().family();
+    }
 
     QColor blueColor() const { return m_blueColor; }
     QColor redColor() const { return m_redColor; }

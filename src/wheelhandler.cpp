@@ -101,18 +101,29 @@ bool GlobalWheelFilter::eventFilter(QObject *watched, QEvent *event)
 
 void GlobalWheelFilter::manageWheel(QQuickItem *target, QWheelEvent *event)
 {
-    // Duck typing: accept everyhint that has all the properties we need
-    /* clang-format off */
-    if (target->metaObject()->indexOfProperty("contentX") == -1
-        || target->metaObject()->indexOfProperty("contentY") == -1
-        || target->metaObject()->indexOfProperty("contentWidth") == -1
-        || target->metaObject()->indexOfProperty("contentHeight") == -1
-        || target->metaObject()->indexOfProperty("topMargin") == -1
-        || target->metaObject()->indexOfProperty("bottomMargin") == -1
-        || target->metaObject()->indexOfProperty("leftMargin") == -1
-        || target->metaObject()->indexOfProperty("rightMargin") == -1
-        || target->metaObject()->indexOfProperty("originX") == -1
-        || target->metaObject()->indexOfProperty("originY") == -1) { /* clang-format on */
+    const QMetaObject *mo = target->metaObject();
+    static const QMetaObject *cachedMetaObject = nullptr;
+    static int idxContentX = -1, idxContentY = -1, idxContentW = -1, idxContentH = -1;
+    static int idxTopM = -1, idxBottomM = -1, idxLeftM = -1, idxRightM = -1;
+    static int idxOriginX = -1, idxOriginY = -1;
+
+    if (mo != cachedMetaObject) {
+        cachedMetaObject = mo;
+        idxContentX = mo->indexOfProperty("contentX");
+        idxContentY = mo->indexOfProperty("contentY");
+        idxContentW = mo->indexOfProperty("contentWidth");
+        idxContentH = mo->indexOfProperty("contentHeight");
+        idxTopM = mo->indexOfProperty("topMargin");
+        idxBottomM = mo->indexOfProperty("bottomMargin");
+        idxLeftM = mo->indexOfProperty("leftMargin");
+        idxRightM = mo->indexOfProperty("rightMargin");
+        idxOriginX = mo->indexOfProperty("originX");
+        idxOriginY = mo->indexOfProperty("originY");
+    }
+
+    if (idxContentX == -1 || idxContentY == -1 || idxContentW == -1 || idxContentH == -1 ||
+        idxTopM == -1 || idxBottomM == -1 || idxLeftM == -1 || idxRightM == -1 ||
+        idxOriginX == -1 || idxOriginY == -1) {
         return;
     }
 

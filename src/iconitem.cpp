@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2026 Project Aevis Contributors.
  *
  * Author:     revenmartin <revenmartin@gmail.com>
  *
@@ -31,10 +32,9 @@ IconItem::IconItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
 {
     setFlag(ItemHasContents, true);
-    setRenderTarget(QQuickPaintedItem::FramebufferObject);
+    setRenderTarget(QQuickPaintedItem::Image);
     setSmooth(true);
     setAntialiasing(true);
-    setMipmap(true);
 }
 
 void IconItem::setSource(const QVariant &source)
@@ -130,7 +130,7 @@ void IconItem::paint(QPainter *painter)
         return;
 
     painter->setRenderHints(QPainter::SmoothPixmapTransform | QPainter::Antialiasing);
-    painter->drawPixmap(contentsBoundingRect().toRect(), m_iconPixmap);
+    painter->drawPixmap(QPointF(0, 0), m_iconPixmap);
 }
 
 void IconItem::updateIcon()

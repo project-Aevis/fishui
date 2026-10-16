@@ -1,7 +1,13 @@
+/*
+ * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2026 Project Aevis Contributors.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import Qt5Compat.GraphicalEffects
 import FishUI 1.0 as FishUI
 
 FishUI.Window {
@@ -25,7 +31,8 @@ FishUI.Window {
     property var iconSource
     property string name
     property string description
-    property string link: "https://cutefishos.com"
+    property string attribution: qsTr("Project Aevis — Built upon the foundation of Cutefish OS")
+    property string link: "https://github.com/project-aevis"
     property var contentHeight: _mainLayout.implicitHeight + control.header.height * 2
 
     background.opacity: FishUI.Theme.blurEnabled ? (FishUI.Theme.darkMode ? 0.75 : 0.78) : 1
@@ -56,6 +63,14 @@ FishUI.Window {
         Label {
             text: control.description
             Layout.alignment: Qt.AlignHCenter
+        }
+
+        Label {
+            text: control.attribution
+            Layout.alignment: Qt.AlignHCenter
+            font.pointSize: 9
+            color: FishUI.Theme.disabledTextColor
+            visible: control.attribution.length > 0
         }
 
         Label {

@@ -52,10 +52,13 @@ QPixmap IconThemeProvider::requestPixmap(const QString &id, QSize *realSize,
     QIcon icon = QIcon::fromTheme(id);
     if (icon.isNull()) {
         const QString cur = QIcon::themeName();
-        if (cur != QLatin1String("Cutefish")) {
-            QIcon::setThemeName(QLatin1String("Cutefish"));
-            icon = QIcon::fromTheme(id);
-            QIcon::setThemeName(cur);
+        for (const auto &theme : { QLatin1String("Aevis"), QLatin1String("Cutefish") }) {
+            if (cur != theme) {
+                QIcon::setThemeName(theme);
+                icon = QIcon::fromTheme(id);
+                QIcon::setThemeName(cur);
+                if (!icon.isNull()) break;
+            }
         }
     }
     if (icon.isNull())
